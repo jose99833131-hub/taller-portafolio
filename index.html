@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="es" class="dark scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Engineering & Analytics Portfolio</title>
+
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+            animation: {
+              "fade-in": "fadeIn 0.45s ease-out forwards",
+              "slide-up":
+                "slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+              "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            },
+            keyframes: {
+              fadeIn: {
+                "0%": { opacity: "0", transform: "translateY(10px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+              slideUp: {
+                "0%": {
+                  opacity: "0",
+                  transform: "scale(0.96) translateY(20px)",
+                },
+                "100%": { opacity: "1", transform: "scale(1) translateY(0)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+
+    <!-- Prism.js (Syntax Highlighting) -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+
+    <!-- SheetJS (Previsualización de archivos Excel / CSV en navegador) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+
+    <style>
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0f172a;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #06b6d4;
+      }
+      .bg-grid-pattern {
+        background-image: radial-gradient(
+          rgba(170, 18, 18, 0.908) 1px,
+          transparent 1px
+        );
+        background-size: 28px 28px;
+      }
+    </style>
+  </head>
+
+
+  <body
+    class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500 selection:text-slate-950 relative overflow-x-hidden"
+  >
+    <!-- Luces de fondo decorativas -->
+    <div class="fixed inset-0 bg-grid-pattern pointer-events-none z-0"></div>
+    <div
+      class="fixed -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow z-0"
+    ></div>
+    <div
+      class="fixed top-1/3 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow z-0"
+    ></div>
+
+
+    <!-- Notificación Toast -->
+    <div
+      id="toast"
+      class="fixed bottom-6 right-6 z-50 hidden bg-slate-900/95 border border-cyan-500/40 text-slate-100 px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-3 transition-all duration-300"
+    >
+      <span class="text-cyan-400 text-lg">✓</span>
+      <span id="toast-msg" class="text-sm font-medium">Copiado</span>
+    </div>
+
+
+    <!-- Barra de Navegación -->
+    <header
+      class="border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl sticky top-0 z-30"
+    >
+      <div
+        class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center gap-4"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 font-mono font-bold text-slate-950 text-lg"
+          >
+            DE
+          </div>
+          <div>
+            <h1
+              id="i18n-nav-title"
+              class="text-lg font-bold tracking-tight text-white"
+            >
+              Repositorio de Proyectos
+            </h1>
+            <p id="i18n-nav-subtitle" class="text-xs text-slate-400">
+              Ingeniería en Datos e Inteligencia Organizacional
+            </p>
+          </div>
+        </div>
+
+
+        <div class="flex items-center gap-3">
+          <!-- Estado de conexión -->
+          <div
+            id="status-badge"
+            class="text-xs px-3 py-1.5 rounded-full bg-slate-900 border border-slate-700 text-slate-400 flex items-center gap-2"
+          >
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+            <span id="status-text">Conectando...</span>
+          </div>
+
+
+          <!-- Botón selector de idioma con estado de traducción -->
+          <button
+            id="lang-toggle"
+            class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 transition-colors flex items-center gap-1.5"
+            title="Switch Language / Cambiar Idioma"
+          >
+            <span id="lang-icon">🌐</span>
+            <span id="lang-label">ES</span>
+          </button>
+
+
+          <!-- Botón de Contacto directo -->
+          <a
+            href="mailto:jose99833131@gmail.com?subject=Contacto%20desde%20Portafolio%20de%20Datos"
+            class="text-xs font-semibold px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:scale-105 flex items-center gap-1.5"
+          >
+            <span>✉️</span>
+            <span id="i18n-contact-btn">Contactar</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+
+    <!-- Sección Hero & Estadísticas -->
+    <section class="relative z-10 max-w-7xl mx-auto px-6 pt-12 pb-6 w-full">
+      <div
+        class="bg-gradient-to-b from-slate-900/90 to-slate-900/40 border border-slate-800/80 rounded-3xl p-8 md:p-10 backdrop-blur-sm shadow-2xl"
+      >
+        <div class="max-w-3xl">
+          <div
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium mb-4"
+          >
+            <span>⚡</span>
+            <span id="i18n-hero-badge">Portafolio Cloud en Tiempo Real</span>
+          </div>
+          <h2
+            id="i18n-hero-title"
+            class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-3"
+          >
+            Biblioteca de Proyectos y Análisis de Datos
+          </h2>
+          <p
+            id="i18n-hero-desc"
+            class="text-slate-400 text-sm md:text-base leading-relaxed mb-6"
+          >
+            Explora pipelines de datos, modelos predictivos, scripts de
+            transformación, visualizaciones interactivas y datasets
+            descargables.
+          </p>
+
+
+          <!-- Acciones de correo rápidas -->
+          <div class="flex flex-wrap items-center gap-3 text-xs">
+            <a
+              href="mailto:jos99833131@gmail.com?subject=Oportunidad%20/%20Consulta%20-%20Portafolio%20de%20Datos"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 transition-all font-medium"
+            >
+              <span>📬</span>
+              <span>jose99833131@gmail.com</span>
+            </a>
+            <button
+              id="copy-email-btn"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-slate-700 transition-all"
+            >
+              <span>📋</span>
+              <span id="i18n-copy-email">Copiar correo</span>
+            </button>
+          </div>
+        </div>
+
+
+        <!-- Contadores rápidos -->
+        <div
+          class="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-slate-800/80"
+        >
+          <div>
+            <p
+              id="stat-projects"
+              class="text-2xl font-bold text-white font-mono"
+            >
+              0
+            </p>
+            <p id="i18n-stat-projects" class="text-xs text-slate-400">
+              Proyectos publicados
+            </p>
+          </div>
+          <div>
+            <p
+              id="stat-tags"
+              class="text-2xl font-bold text-cyan-400 font-mono"
+            >
+              0
+            </p>
+            <p id="i18n-stat-tags" class="text-xs text-slate-400">
+              Tecnologías y métodos
+            </p>
+          </div>
+          <div>
+            <p
+              id="stat-datasets"
+              class="text-2xl font-bold text-blue-400 font-mono"
+            >
+              0
+            </p>
+            <p id="i18n-stat-datasets" class="text-xs text-slate-400">
+              Datasets disponibles
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Controles de Búsqueda y Filtros -->
+    <section class="relative z-10 max-w-7xl mx-auto px-6 py-4 w-full">
+      <div
+        class="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center"
+      >
+        <!-- Input Búsqueda -->
+        <div class="relative flex-1 max-w-md">
+          <span
+            class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
+            >🔍</span
+          >
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Buscar por título, tecnología o palabra clave..."
+            class="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-800 focus:border-cyan-500 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-colors"
+          />
+        </div>
+
+
+        <!-- Filtros por Tags -->
+        <div
+          id="tags-filter-container"
+          class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0"
+        ></div>
+      </div>
+    </section>
+
+
+    <!-- Grid Principal de Proyectos -->
+    <main class="relative z-10 max-w-7xl mx-auto px-6 py-6 flex-1 w-full">
+      <div
+        id="projects-grid"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <!-- Esqueletos de carga iniciales -->
+        <div
+          class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 animate-pulse h-64 flex flex-col justify-between"
+        >
+          <div>
+            <div class="h-4 bg-slate-800 rounded w-1/3 mb-4"></div>
+            <div class="h-6 bg-slate-800 rounded w-3/4 mb-3"></div>
+            <div class="h-4 bg-slate-800 rounded w-full mb-2"></div>
+            <div class="h-4 bg-slate-800 rounded w-2/3"></div>
+          </div>
+          <div class="h-4 bg-slate-800 rounded w-1/4"></div>
+        </div>
+      </div>
+    </main>
+
+
+    <!-- Modal Detalle del Proyecto -->
+    <div
+      id="project-modal"
+      class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden p-4 md:p-8 overflow-y-auto z-40 transition-opacity"
+    >
+      <div
+        class="max-w-5xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-10 relative shadow-2xl animate-slide-up my-6"
+      >
+        <button
+          id="close-btn"
+          class="sticky top-4 float-right w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xl font-bold transition-colors z-10"
+          title="Cerrar (Esc)"
+        >
+          &times;
+        </button>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+
+
+    <!-- Lightbox para ampliar imágenes/gráficas -->
+    <div
+      id="lightbox"
+      class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-4 cursor-zoom-out"
+    >
+      <img
+        id="lightbox-img"
+        src=""
+        alt="Zoom"
+        class="max-w-full max-h-[92vh] rounded-lg shadow-2xl object-contain"
+      />
+    </div>
+
+
+    <!-- Footer -->
+    <footer
+      class="relative z-10 border-t border-slate-900 bg-slate-950/90 mt-16 py-8"
+    >
+      <div
+        class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500"
+      >
+        <div>
+          <span id="i18n-footer-rights"
+            >Desarrollado para Ingeniería en Datos • Alojado en la Nube</span
+          >
+        </div>
+        <div class="flex items-center gap-4">
+          <a
+            href="mailto:jose99833131@gmail.com?subject=Contacto%20Portafolio"
+            class="text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-1.5"
+          >
+            <span>✉️</span>
+            <span>jose99833131@gmail.com</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+
+    <!-- Lógica Principal -->
+    <script type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+
+      // ==========================================
+      // ⚙️ CREDENCIALES DE SUPABASE
+      // ==========================================
+      const SUPABASE_URL = "https://dddjautaewnvqxhgmhmq.supabase.co";
+      const SUPABASE_ANON_KEY = 
+        "sb_publishable_eZZHqHHGEaUyorPE-Ke4Vw_eg6uoAPr";
+
+
+      const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      let rawProjects = []; // Datos originales de la BD
+      let allProjects = []; // Datos activos (originales o traducidos)
+      let activeTag = "ALL";
+      let currentOpenModalId = null;
+
+
+      // ==========================================
+      // 🌐 DICCIONARIO DE INTERFAZ (ES / EN)
+      // ==========================================
+      const i18n = {
+        es: {
+          navTitle: "Repositorio de Proyectos",
+          navSubtitle: "Ingeniería en Datos e Inteligencia Organizacional",
+          connecting: "Conectando...",
+          online: "En línea",
+          works: "trabajos",
+          errorConn: "Error al conectar",
+          contactBtn: "Contactar",
+          heroBadge: "Portafolio Cloud en Tiempo Real",
+          heroTitle: "Biblioteca de Proyectos y Análisis de Datos",
+          heroDesc:
+            "Explora pipelines de datos, modelos predictivos, scripts de transformación, visualizaciones interactivas y datasets descargables.",
+          copyEmail: "Copiar correo",
+          emailCopied: "Correo jose99833131@gmail.com copiado al portapapeles",
+          codeCopied: "Código copiado al portapapeles",
+          statProjects: "Proyectos publicados",
+          statTags: "Tecnologías y métodos",
+          statDatasets: "Datasets disponibles",
+          searchPlaceholder: "Buscar por título, tecnología o palabra clave...",
+          filterAll: "Todos",
+          emptyProjects: "No se encontraron proyectos con ese criterio.",
+          viewDetails: "Explorar resultados y datos",
+          conclusionsTitle: "💡 Conclusiones y Hallazgos",
+          chartsTitle: "📊 Gráficos y Visualizaciones (Clic para ampliar)",
+          codeTitle: "💻 Código Fuente / Transformación",
+          copyCodeBtn: "Copiar código",
+          datasetTitle: "🗂️ Explorador de Dataset y Archivo Fuente",
+          downloadDataset: "Descargar Archivo Original",
+          previewLoading: "Cargando previsualización del dataset en vivo...",
+          previewError:
+            "Previsualización directa no disponible para este enlace. Puedes descargar el archivo directamente.",
+          rowsShown: "Mostrando primeras filas",
+          columnsLabel: "columnas",
+          sheetLabel: "Hoja:",
+          askAboutProject:
+            "¿Dudas sobre este proyecto? Escríbeme a jose99833131@gmail.com",
+          contactAuthor: "✉️ Contactar al autor",
+          footerRights:
+            "Desarrollado para Ingeniería en Datos • Alojado en la Nube",
+          translatingToast: "Traduciendo entradas automáticamente...",
+        },
+        en: {
+          navTitle: "Project Repository",
+          navSubtitle: "Data Engineering & Organizational Intelligence",
+          connecting: "Connecting...",
+          online: "Online",
+          works: "projects",
+          errorConn: "Connection error",
+          contactBtn: "Contact Me",
+          heroBadge: "Real-Time Cloud Portfolio",
+          heroTitle: "Data Engineering & Analytics Library",
+          heroDesc:
+            "Explore data pipelines, predictive models, transformation scripts, interactive visualizations, and downloadable datasets.",
+          copyEmail: "Copy email",
+          emailCopied: "Email jose99833131@gmail.com copied to clipboard",
+          codeCopied: "Code copied to clipboard",
+          statProjects: "Published projects",
+          statTags: "Technologies & methods",
+          statDatasets: "Available datasets",
+          searchPlaceholder: "Search by title, technology, or keyword...",
+          filterAll: "All",
+          emptyProjects: "No projects found matching your criteria.",
+          viewDetails: "Explore results & data",
+          conclusionsTitle: "💡 Key Conclusions & Findings",
+          chartsTitle: "📊 Charts & Visualizations (Click to zoom)",
+          codeTitle: "💻 Source Code / Transformation",
+          copyCodeBtn: "Copy code",
+          datasetTitle: "🗂️ Live Dataset Explorer & Source File",
+          downloadDataset: "Download Raw Dataset",
+          previewLoading: "Loading live dataset preview...",
+          previewError:
+            "Direct table preview not available for this link. You can download the file directly.",
+          rowsShown: "Showing top rows",
+          columnsLabel: "columns",
+          sheetLabel: "Sheet:",
+          askAboutProject:
+            "Questions about this project? Reach out at jose99833131@gmail.com",
+          contactAuthor: "✉️ Contact author",
+          footerRights: "Built for Data Engineering • Cloud Hosted",
+          translatingToast: "Translating entries automatically...",
+        },
+      };
+
+
+      const userBrowserLang = (
+        navigator.language ||
+        navigator.userLanguage ||
+        "es"
+      ).toLowerCase();
+      let currentLang = userBrowserLang.startsWith("es") ? "es" : "en";
+
+
+      function t(key) {
+        return i18n[currentLang][key] || key;
+      }
+
+
+      // ==========================================
+      // 🤖 MOTOR DE TRADUCCIÓN AUTOMÁTICA SIN BD
+      // ==========================================
+      const CACHE_KEY = "portfolio_translations_v1";
+      let translationCache = {};
+      try {
+        translationCache = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
+      } catch {
+        translationCache = {};
+      }
+
+
+      function saveCache() {
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(translationCache));
+        } catch {
+          // Ignorar si localStorage está lleno
+        }
+      }
+
+
+      async function translateString(text, targetLang) {
+        if (!text || !text.trim()) return text;
+        const cacheId = `${targetLang}:${text}`;
+        if (translationCache[cacheId]) {
+          return translationCache[cacheId];
+        }
+
+
+        try {
+          const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(
+            text,
+          )}`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("Translation API error");
+          const data = await res.json();
+
+
+          const translated = data[0].map((segment) => segment[0]).join("");
+          translationCache[cacheId] = translated;
+          saveCache();
+          return translated;
+        } catch (err) {
+          console.warn("Translation fallback:", err);
+          return text;
+        }
+      }
+
+
+      async function syncProjectsLanguage() {
+        if (rawProjects.length === 0) return;
+
+
+        const langIcon = document.getElementById("lang-icon");
+        langIcon.textContent = "⏳";
+
+
+        try {
+          const translatedList = await Promise.all(
+            rawProjects.map(async (proj) => {
+              const [title, summary, conclusions, ...tags] = await Promise.all([
+                translateString(proj.title || "", currentLang),
+                translateString(proj.summary || "", currentLang),
+                translateString(proj.conclusions || "", currentLang),
+                ...(proj.tags || []).map((tag) =>
+                  translateString(tag, currentLang),
+                ),
+              ]);
+
+
+              return {
+                ...proj,
+                title,
+                summary,
+                conclusions,
+                tags,
+              };
+            }),
+          );
+
+
+          allProjects = translatedList;
+        } catch (e) {
+          console.error("Error translating projects:", e);
+          allProjects = [...rawProjects];
+        } finally {
+          langIcon.textContent = "🌐";
+        }
+      }
+
+
+      async function applyTranslations() {
+        document.documentElement.lang = currentLang;
+        document.getElementById("lang-label").textContent =
+          currentLang.toUpperCase();
+        document.getElementById("i18n-nav-title").textContent = t("navTitle");
+        document.getElementById("i18n-nav-subtitle").textContent =
+          t("navSubtitle");
+        document.getElementById("i18n-contact-btn").textContent =
+          t("contactBtn");
+        document.getElementById("i18n-hero-badge").textContent = t("heroBadge");
+        document.getElementById("i18n-hero-title").textContent = t("heroTitle");
+        document.getElementById("i18n-hero-desc").textContent = t("heroDesc");
+        document.getElementById("i18n-copy-email").textContent = t("copyEmail");
+        document.getElementById("i18n-stat-projects").textContent =
+          t("statProjects");
+        document.getElementById("i18n-stat-tags").textContent = t("statTags");
+        document.getElementById("i18n-stat-datasets").textContent =
+          t("statDatasets");
+        document.getElementById("search-input").placeholder =
+          t("searchPlaceholder");
+        document.getElementById("i18n-footer-rights").textContent =
+          t("footerRights");
+
+
+        if (rawProjects.length > 0) {
+          activeTag = "ALL";
+          await syncProjectsLanguage();
+          updateStatusBadge(true);
+          renderTagFilters();
+          filterAndRender();
+
+
+          if (currentOpenModalId !== null) {
+            openModal(currentOpenModalId);
+          }
+        }
+      }
+
+
+      // ==========================================
+      // 🔔 NOTIFICACIONES Y UTILIDADES
+      // ==========================================
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        document.getElementById("toast-msg").textContent = message;
+        toast.classList.remove("hidden");
+        setTimeout(() => toast.classList.add("hidden"), 3000);
+      }
+
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return String(str).replace(
+          /[&<>"']/g,
+          (m) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[m],
+        );
+      }
+
+
+      function updateStatusBadge(isOnline) {
+        const badge = document.getElementById("status-badge");
+        if (isOnline) {
+          badge.className =
+            "text-xs px-3 py-1.5 rounded-full bg-emerald-950/90 border border-emerald-700/60 text-emerald-400 flex items-center gap-2";
+          badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>${t("online")} (${allProjects.length} ${t("works")})</span>`;
+        } else {
+          badge.className =
+            "text-xs px-3 py-1.5 rounded-full bg-red-950/90 border border-red-800 text-red-400 flex items-center gap-2";
+          badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400"></span><span>${t("errorConn")}</span>`;
+        }
+      }
+
+
+      // ==========================================
+      // 📡 CARGA DE DATOS DESDE SUPABASE
+      // ==========================================
+      async function loadProjects() {
+        try {
+          const { data, error } = await db
+            .from("projects")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+
+          if (error) throw error;
+          rawProjects = data || [];
+          allProjects = [...rawProjects];
+
+
+          await syncProjectsLanguage();
+          updateStats();
+          updateStatusBadge(true);
+          renderTagFilters();
+          filterAndRender();
+        } catch (err) {
+          console.error(err);
+          updateStatusBadge(false);
+        }
+      }
+
+
+      function updateStats() {
+        const uniqueTags = new Set();
+        let datasetsCount = 0;
+
+
+        rawProjects.forEach((p) => {
+          (p.tags || []).forEach((tag) => uniqueTags.add(tag.trim()));
+          if (p.dataset_url) datasetsCount++;
+        });
+
+
+        document.getElementById("stat-projects").textContent =
+          rawProjects.length;
+        document.getElementById("stat-tags").textContent = uniqueTags.size;
+        document.getElementById("stat-datasets").textContent = datasetsCount;
+      }
+
+
+      // ==========================================
+      // 🏷️ FILTROS Y RENDERIZADO DE TARJETAS
+      // ==========================================
+      function renderTagFilters() {
+        const container = document.getElementById("tags-filter-container");
+        const tagsSet = new Set();
+        allProjects.forEach((p) =>
+          (p.tags || []).forEach((tag) => tagsSet.add(tag)),
+        );
+        const tagsArray = ["ALL", ...Array.from(tagsSet)];
+
+
+        container.innerHTML = tagsArray
+          .map((tag) => {
+            const isActive = activeTag === tag;
+            const label = tag === "ALL" ? t("filterAll") : escapeHtml(tag);
+            const activeClasses = isActive
+              ? "bg-cyan-500 text-slate-950 font-semibold border-cyan-400"
+              : "bg-slate-900/90 text-slate-400 hover:text-slate-200 border-slate-800 hover:border-slate-700";
+
+
+            return `<button data-tag="${escapeHtml(tag)}" class="tag-btn text-xs px-3.5 py-1.5 rounded-xl border transition-all whitespace-nowrap ${activeClasses}">${label}</button>`;
+          })
+          .join("");
+
+
+        container.querySelectorAll(".tag-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            activeTag = btn.getAttribute("data-tag");
+            renderTagFilters();
+            filterAndRender();
+          });
+        });
+      }
+
+
+      function filterAndRender() {
+        const query = document
+          .getElementById("search-input")
+          .value.toLowerCase()
+          .trim();
+        const filtered = allProjects.filter((p) => {
+          const matchesTag =
+            activeTag === "ALL" || (p.tags || []).includes(activeTag);
+          const matchesSearch =
+            !query ||
+            (p.title || "").toLowerCase().includes(query) ||
+            (p.summary || "").toLowerCase().includes(query) ||
+            (p.conclusions || "").toLowerCase().includes(query) ||
+            (p.tags || []).some((tag) => tag.toLowerCase().includes(query));
+          return matchesTag && matchesSearch;
+        });
+
+
+        renderProjects(filtered);
+      }
+
+
+      function renderProjects(projects) {
+        const grid = document.getElementById("projects-grid");
+        if (projects.length === 0) {
+          grid.innerHTML = `
+            <div class="col-span-full bg-slate-900/40 border border-slate-800/80 rounded-2xl p-12 text-center">
+              <p class="text-slate-400 text-sm">${t("emptyProjects")}</p>
+            </div>`;
+          return;
+        }
+
+
+        grid.innerHTML = projects
+          .map((p, idx) => {
+            const thumb =
+              p.charts_urls && p.charts_urls.length > 0
+                ? p.charts_urls[0]
+                : null;
+            const tagsHtml = (p.tags || [])
+              .map(
+                (tag) =>
+                  `<span class="text-[10px] uppercase tracking-wider font-semibold bg-slate-800/90 text-cyan-400 border border-slate-700/80 px-2.5 py-0.5 rounded-md">${escapeHtml(tag)}</span>`,
+              )
+              .join("");
+
+
+            const dateStr = p.created_at
+              ? new Date(p.created_at).toLocaleDateString(
+                  currentLang === "es" ? "es-MX" : "en-US",
+                  {
+                    year: "numeric",
+                    month: "short",
+                  },
+                )
+              : "";
+
+
+            return `
+              <article
+                data-id="${p.id}"
+                style="animation-delay: ${idx * 60}ms"
+                class="project-card opacity-0 animate-fade-in bg-slate-900/75 border border-slate-800/90 hover:border-cyan-500/60 rounded-2xl overflow-hidden flex flex-col justify-between cursor-pointer group transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-cyan-500/10"
+              >
+                <div>
+                  ${
+                    thumb
+                      ? `<div class="h-44 w-full overflow-hidden bg-slate-950 border-b border-slate-800/80 relative">
+                          <img src="${escapeHtml(thumb)}" alt="${escapeHtml(p.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                          <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
+                        </div>`
+                      : ""
+                  }
+                  <div class="p-6">
+                    <div class="flex flex-wrap gap-1.5 mb-3">${tagsHtml}</div>
+                    <h3 class="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors mb-2 line-clamp-2">
+                      ${escapeHtml(p.title)}
+                    </h3>
+                    <p class="text-sm text-slate-400 line-clamp-3 leading-relaxed">
+                      ${escapeHtml(p.summary || "")}
+                    </p>
+                  </div>
+                </div>
+
+
+                <div class="px-6 pb-5 pt-3 border-t border-slate-800/50 flex items-center justify-between text-xs">
+                  <span class="text-cyan-400 font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                    ${t("viewDetails")} &rarr;
+                  </span>
+                  <div class="flex items-center gap-2 text-slate-500">
+                    ${p.dataset_url ? `<span title="Dataset">📊</span>` : ""}
+                    ${p.code_snippet ? `<span title="Code">💻</span>` : ""}
+                    <span>${dateStr}</span>
+                  </div>
+                </div>
+              </article>
+            `;
+          })
+          .join("");
+
+
+        grid.querySelectorAll(".project-card").forEach((card) => {
+          card.addEventListener("click", () => {
+            openModal(Number(card.getAttribute("data-id")));
+          });
+        });
+      }
+
+
+      // ==========================================
+      // 📊 PREVISUALIZADOR DE EXCEL / CSV (SheetJS)
+      // ==========================================
+      async function loadDatasetPreview(url, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("Network error");
+          const arrayBuffer = await response.arrayBuffer();
+          const workbook = window.XLSX.read(arrayBuffer, { type: "array" });
+
+
+          if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+            throw new Error("Empty workbook");
+          }
+
+
+          function renderSheet(sheetName) {
+            const worksheet = workbook.Sheets[sheetName];
+            const rows = window.XLSX.utils.sheet_to_json(worksheet, {
+              header: 1,
+              defval: "",
+            });
+
+
+            if (!rows || rows.length === 0) {
+              container.innerHTML = `<p class="text-xs text-slate-400 p-4">${t("previewError")}</p>`;
+              return;
+            }
+
+
+            const headers = rows[0] || [];
+            const dataRows = rows.slice(1, 51);
+
+
+            const tabsHtml =
+              workbook.SheetNames.length > 1
+                ? `<div class="flex items-center gap-2 px-4 py-2 bg-slate-900 border-b border-slate-800 text-xs overflow-x-auto">
+                    <span class="text-slate-400 font-medium">${t("sheetLabel")}</span>
+                    ${workbook.SheetNames.map(
+                      (name) =>
+                        `<button data-sheet="${escapeHtml(name)}" class="sheet-tab px-2.5 py-1 rounded ${
+                          name === sheetName
+                            ? "bg-cyan-500 text-slate-950 font-semibold"
+                            : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                        }">${escapeHtml(name)}</button>`,
+                    ).join("")}
+                  </div>`
+                : "";
+
+
+            const tableHtml = `
+              ${tabsHtml}
+              <div class="px-4 py-2 bg-slate-950/60 border-b border-slate-800/80 flex justify-between items-center text-[11px] text-slate-400 font-mono">
+                <span>${t("rowsShown")}: ${dataRows.length} / ${Math.max(0, rows.length - 1)}</span>
+                <span>${headers.length} ${t("columnsLabel")}</span>
+              </div>
+              <div class="overflow-x-auto max-h-80">
+                <table class="w-full text-left border-collapse text-xs font-mono">
+                  <thead class="bg-slate-900 sticky top-0 z-10">
+                    <tr>
+                      <th class="py-2.5 px-3 border-b border-slate-800 text-slate-500">#</th>
+                      ${headers
+                        .map(
+                          (h, i) =>
+                            `<th class="py-2.5 px-3 border-b border-slate-800 text-cyan-400 font-semibold whitespace-nowrap">${
+                              escapeHtml(String(h)) || `Col_${i + 1}`
+                            }</th>`,
+                        )
+                        .join("")}
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-800/60 bg-slate-950/40">
+                    ${dataRows
+                      .map(
+                        (row, rIdx) => `
+                        <tr class="hover:bg-slate-800/40">
+                          <td class="py-2 px-3 text-slate-600">${rIdx + 1}</td>
+                          ${headers
+                            .map(
+                              (_, cIdx) =>
+                                `<td class="py-2 px-3 text-slate-300 whitespace-nowrap max-w-xs truncate">${escapeHtml(
+                                  row[cIdx] !== undefined
+                                    ? String(row[cIdx])
+                                    : "",
+                                )}</td>`,
+                            )
+                            .join("")}
+                        </tr>`,
+                      )
+                      .join("")}
+                  </tbody>
+                </table>
+              </div>
+            `;
+
+
+            container.innerHTML = tableHtml;
+
+
+            container.querySelectorAll(".sheet-tab").forEach((btn) => {
+              btn.addEventListener("click", () => {
+                renderSheet(btn.getAttribute("data-sheet"));
+              });
+            });
+          }
+
+
+          renderSheet(workbook.SheetNames[0]);
+        } catch (err) {
+          console.warn("Dataset preview fallback:", err);
+          container.innerHTML = `<div class="p-4 text-xs text-slate-400">${t("previewError")}</div>`;
+        }
+      }
+
+
+      // ==========================================
+      // 🔍 MODAL DETALLADO DEL PROYECTO
+      // ==========================================
+      function openModal(id) {
+        const p = allProjects.find((item) => item.id === id);
+        if (!p) return;
+        currentOpenModalId = id;
+
+
+        const tagsHtml = (p.tags || [])
+          .map(
+            (tag) =>
+              `<span class="text-xs font-semibold bg-slate-800 text-cyan-400 border border-slate-700 px-3 py-1 rounded-lg">${escapeHtml(
+                tag,
+              )}</span>`,
+          )
+          .join("");
+
+
+        const chartsHtml =
+          p.charts_urls && p.charts_urls.length > 0
+            ? `<div class="my-6">
+                <h4 class="text-sm font-semibold text-slate-300 mb-3">${t("chartsTitle")}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  ${p.charts_urls
+                    .map(
+                      (url) => `
+                      <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 group">
+                        <img
+                          src="${escapeHtml(url)}"
+                          alt="Chart"
+                          class="zoomable-img w-full max-h-80 object-contain cursor-zoom-in group-hover:scale-[1.02] transition-transform"
+                        />
+                      </div>`,
+                    )
+                    .join("")}
+                </div>
+              </div>`
+            : "";
+
+
+        const codeHtml = p.code_snippet
+          ? `<div class="my-6">
+              <div class="flex justify-between items-center mb-2">
+                <h4 class="text-sm font-semibold text-slate-300">${t("codeTitle")}</h4>
+                <button
+                  id="copy-code-btn"
+                  class="text-xs px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 transition-colors"
+                >
+                  📋 ${t("copyCodeBtn")}
+                </button>
+              </div>
+              <pre class="text-xs !bg-slate-950 !border !border-slate-800 rounded-2xl p-4 overflow-x-auto"><code class="language-${
+                p.code_language || "python"
+              }">${escapeHtml(p.code_snippet)}</code></pre>
+            </div>`
+          : "";
+
+
+        const datasetHtml = p.dataset_url
+          ? `<div class="my-6 bg-slate-950/70 border border-slate-800 rounded-2xl overflow-hidden">
+              <div class="p-4 bg-slate-900/80 border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
+                <h4 class="text-sm font-semibold text-slate-200">${t("datasetTitle")}</h4>
+                <a
+                  href="${escapeHtml(p.dataset_url)}"
+                  target="_blank"
+                  download
+                  class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs transition-all"
+                >
+                  <span>📥</span>
+                  <span>${t("downloadDataset")}</span>
+                </a>
+              </div>
+              <div id="dataset-preview-box">
+                <div class="p-6 text-xs text-slate-400 flex items-center gap-3">
+                  <span class="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></span>
+                  <span>${t("previewLoading")}</span>
+                </div>
+              </div>
+            </div>`
+          : "";
+
+
+        const mailSubject = encodeURIComponent(
+          `Consulta sobre proyecto: ${p.title}`,
+        );
+
+
+        document.getElementById("modal-content").innerHTML = `
+          <div class="flex flex-wrap gap-2 mb-3">${tagsHtml}</div>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2">${escapeHtml(p.title)}</h2>
+          <p class="text-sm text-slate-400 mb-6">${escapeHtml(p.summary || "")}</p>
+
+
+          <div class="bg-gradient-to-r from-cyan-950/40 to-slate-900/90 border border-cyan-500/30 p-5 rounded-2xl my-6">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">${t("conclusionsTitle")}</h4>
+            <p class="text-sm text-slate-200 leading-relaxed whitespace-pre-line">${escapeHtml(p.conclusions)}</p>
+          </div>
+
+
+          ${chartsHtml}
+          ${datasetHtml}
+          ${codeHtml}
+
+
+          <div class="mt-8 pt-5 border-t border-slate-800 flex flex-wrap justify-between items-center gap-4 text-xs text-slate-400">
+            <span>${t("askAboutProject")}</span>
+            <a
+              href="mailto:jose99833131@gmail.com?subject=${mailSubject}"
+              class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 font-medium transition-colors"
+            >
+              ${t("contactAuthor")}
+            </a>
+          </div>
+        `;
+
+
+        document.getElementById("project-modal").classList.remove("hidden");
+        if (window.Prism) window.Prism.highlightAll();
+
+
+        const copyCodeBtn = document.getElementById("copy-code-btn");
+        if (copyCodeBtn && p.code_snippet) {
+          copyCodeBtn.addEventListener("click", () => {
+            navigator.clipboard.writeText(p.code_snippet);
+            showToast(t("codeCopied"));
+          });
+        }
+
+
+        document.querySelectorAll(".zoomable-img").forEach((img) => {
+          img.addEventListener("click", () => {
+            const lb = document.getElementById("lightbox");
+            document.getElementById("lightbox-img").src = img.src;
+            lb.classList.remove("hidden");
+            lb.classList.add("flex");
+          });
+        });
+
+
+        if (p.dataset_url) {
+          loadDatasetPreview(p.dataset_url, "dataset-preview-box");
+        }
+      }
+
+
+      function closeModal() {
+        currentOpenModalId = null;
+        document.getElementById("project-modal").classList.add("hidden");
+      }
+
+
+      // ==========================================
+      // 🎛️ EVENT LISTENERS GLOBALES
+      // ==========================================
+      document
+        .getElementById("close-btn")
+        .addEventListener("click", closeModal);
+
+
+      document
+        .getElementById("project-modal")
+        .addEventListener("click", (e) => {
+          if (e.target.id === "project-modal") closeModal();
+        });
+
+
+      document.getElementById("lightbox").addEventListener("click", () => {
+        const lb = document.getElementById("lightbox");
+        lb.classList.add("hidden");
+        lb.classList.remove("flex");
+      });
+
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeModal();
+          const lb = document.getElementById("lightbox");
+          lb.classList.add("hidden");
+          lb.classList.remove("flex");
+        }
+      });
+
+
+      document
+        .getElementById("search-input")
+        .addEventListener("input", filterAndRender);
+
+
+      document
+        .getElementById("lang-toggle")
+        .addEventListener("click", async () => {
+          currentLang = currentLang === "es" ? "en" : "es";
+          showToast(t("translatingToast"));
+          await applyTranslations();
+        });
+      document
+        .getElementById("copy-email-btn")
+        .addEventListener("click", () => {
+          navigator.clipboard.writeText("jose99833131@gmail.com");
+          showToast(t("emailCopied"));
+        });
+
+
+      // Inicializar aplicación
+      applyTranslations();
+      loadProjects();
+    </script>
+  </body>
+</html>
+
+
